@@ -27,5 +27,16 @@ export const ZodAddon: WretchAddon<ZodWretch, ZodResolver> = {
     parsed(schema) {
       return this.json().then((json) => schema.parse(json));
     }
+    maybeParsed(statusCode, schema) {
+      const maybeSchema = schema.catch(() => null);
+
+      return this.res(async (response) => {
+        if (response.statusCode === statusCode) {
+          return maybeSchema.parse(null);
+        }
+
+        return response;
+      })
+    }
   },
 };
