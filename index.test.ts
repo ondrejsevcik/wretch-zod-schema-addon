@@ -1,18 +1,18 @@
-// sum.test.js
-import { expect, test } from "vitest";
-import { addon } from "./index";
+import { expect, it, describe } from "vitest";
+import { ZodAddon } from "./index";
 import wretch from "wretch";
 import z from "zod";
 
 const schema = z.object({ name: z.string() });
 
-test("adds 1 + 2 to equal 3", async () => {
-  const typesObject = await wretch()
-    .addon(addon())
-    .url("http://localhost/api/user")
-    .responseBodySchema(schema)
-    .get()
-    .parsed()
+describe("ZodAddon", () => {
+  it("returns parsed response body", async () => {
+    const result = await wretch()
+      .addon(ZodAddon)
+      .url("http://localhost/api/user")
+      .get()
+      .parsed(schema)
 
-  expect(typesObject).toBeDefined();
+    expect(result.name).toBeDefined();
+  });
 });
