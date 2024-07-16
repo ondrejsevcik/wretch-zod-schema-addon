@@ -7,24 +7,30 @@ import type {
 } from "wretch";
 import type { ZodType } from "zod";
 
-export interface ZodSchemaAddon {}
+export interface ZodWretch {
+  responseBodySchema: <T extends ZodWretch, C, R, Output>(this: T & Wretch<T, C, R>, schema: ZodType<Output>) => this
+}
 
-export interface ZodSchemaResolver {
-  withSchema: <T, C extends ZodSchemaResolver, R, Output extends unknown>(
+export interface ZodResolver {
+  parsed: <T, C extends ZodResolver, R, Output extends unknown>(
     this: C & WretchResponseChain<T, C, R>,
-    schema: ZodType<Output>
   ) => Promise<Output>;
 }
 
-export const addon: () => WretchAddon<
-  ZodSchemaAddon,
-  ZodSchemaResolver
-> = () => {
+export const addon: () => WretchAddon<ZodWretch, ZodResolver> = () => {
   return {
-    resolver: {
-      withSchema(schema) {
-        return this.json().then((json) => schema.parse(json));
+    wretch: {
+      responseBodySchema(schema) {
+        return { ...this, _options: { ...this._options, responseBodySchema: schema } }
       },
+    },
+    resolver: {
+      // responseBodySchema(schema) {
+      //   return this.json().then((json) => schema.parse(json));
+      // },
+      parsed() {
+        return this.json().then((json) => this._options.responseBodySchema.parse(json));
+      }
     },
   };
 };

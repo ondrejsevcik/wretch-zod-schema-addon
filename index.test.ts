@@ -10,8 +10,9 @@ test("adds 1 + 2 to equal 3", async () => {
   const typesObject = await wretch()
     .addon(addon())
     .url("http://localhost/api/user")
+    .responseBodySchema(schema)
     .get()
-    .withSchema(schema);
+    .parsed()
 
   expect(typesObject).toBeDefined();
 });
